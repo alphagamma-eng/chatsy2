@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat&gt;sy</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#444" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</head>
+<body>
+  <main class="chat">
+    <div class="chat-header">
+      Chat&gt;sy
+      <button id="theme-toggle">🌓</button>
+      <button id="clear-chat">🗑️</button>
+    </div>
+    <div id="messages" class="chat-messages"></div>
+    <form id="chat-form" autocomplete="off">
+      <input id="msg-input" placeholder="Type a message..." />
+      <button type="submit">➤</button>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('msg-input');
+    const messages = document.getElementById('messages');
+    const clearBtn = document.getElementById('clear-chat');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    let chats = JSON.parse(localStorage.getItem('chatsy') || '[]');
+    let dark = localStorage.getItem('darkMode') === 'true';
+
+    function renderChats() {
+      messages.innerHTML = chats.map(m => `<div class="bubble">${m}</div>`).join('');
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function toggleTheme() {
+      dark = !dark;
+      document.body.classList.toggle('dark', dark);
+      localStorage.setItem('darkMode', dark);
+    }
+
+    form.onsubmit = e => {
+      e.preventDefault();
+      const msg = input.value.trim();
+      if (msg) {
+        chats.push(msg);
+        localStorage.setItem('chatsy', JSON.stringify(chats));
+        renderChats();
+        input.value = '';
+      }
+    };
+
+    clearBtn.onclick = () => {
+      if (confirm('Clear all chat?')) {
+        chats = [];
+        localStorage.removeItem('chatsy');
+        renderChats();
+      }
+    };
+
+    themeToggle.onclick = toggleTheme;
+
+    // Init
+    if (dark) document.body.classList.add('dark');
+    renderChats();
+  </script>
+</body>
+</html>
